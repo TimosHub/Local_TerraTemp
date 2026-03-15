@@ -7,6 +7,15 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    #stars-bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
     body {
       background: #080c14;
       color: #fff;
@@ -14,41 +23,44 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       overflow: hidden;
     }
 
     header {
+      flex-shrink: 0;
       padding: 28px 0 0;
+      text-align: center;
       letter-spacing: 0.18em;
       font-size: 1.1rem;
       font-weight: 300;
       text-transform: uppercase;
       color: #7ecfff;
-      z-index: 10;
-    }
-
-    header span {
-      font-weight: 700;
-      color: #fff;
-    }
-
-    #canvas-wrap {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      z-index: 1;
       position: relative;
     }
 
+    header span { font-weight: 700; color: #fff; }
+
+    /* ── Main row ── */
+    #main { position: relative; z-index: 1; }
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ── Info panel ── */
     #info {
-      position: absolute;
-      left: 6%;
-      max-width: 220px;
+      width: 230px;
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 22px;
+      padding-left: 44px;
     }
 
     #info h2 {
@@ -69,8 +81,125 @@
 
     .info-block { border-left: 1px solid #1a3a55; padding-left: 14px; }
 
+    /* ── Globe ── */
+    #globe-container {
+      flex-shrink: 0;
+      height: 100%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     canvas { display: block; }
 
+    /* ── Temperature slider ── */
+    #temp-panel {
+      flex-shrink: 0;
+      width: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      user-select: none;
+      padding-right: 20px;
+    }
+
+    #temp-panel .panel-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #7ecfff;
+    }
+
+    #temp-value {
+      font-size: 1.8rem;
+      font-weight: 200;
+      color: #fff;
+      text-align: center;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    #slider-area {
+      display: flex;
+      align-items: stretch;
+      gap: 14px;
+    }
+
+    #tick-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 460px;
+      padding: 10px 0;
+    }
+
+    #tick-labels span {
+      font-size: 0.75rem;
+      color: #3a5a72;
+      text-align: right;
+      line-height: 1;
+    }
+
+    #tick-labels span.zero { color: #5a8aaa; }
+
+    #track-wrap {
+      position: relative;
+      width: 16px;
+      height: 460px;
+      cursor: pointer;
+    }
+
+    #track-bg {
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      background: linear-gradient(
+        to bottom,
+        #c0392b,
+        #e67e22,
+        #f1c40f,
+        #111c28,
+        #7fb3d3,
+        #2980b9,
+        #29d4ff
+      );
+      opacity: 0.28;
+    }
+
+    #track-fill {
+      position: absolute;
+      left: 0; right: 0;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+
+    #thumb {
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      transition: background 0.15s, box-shadow 0.15s;
+      cursor: grab;
+      z-index: 2;
+    }
+
+    #thumb::after {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+    }
+
+    #thumb:active { cursor: grabbing; }
+
+    /* ── Auto-rotate toggle ── */
     #controls {
       position: fixed;
       top: 22px;
@@ -82,9 +211,9 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: #5a8aaa;
+      z-index: 20;
     }
 
-    /* Toggle switch */
     .switch { position: relative; width: 36px; height: 20px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider {
@@ -108,7 +237,9 @@
   </style>
 </head>
 <body>
+  <canvas id="stars-bg"></canvas>
   <header><span>Terra</span>Temp</header>
+
   <div id="controls">
     <span>Auto-rotate</span>
     <label class="switch">
@@ -116,7 +247,8 @@
       <span class="slider"></span>
     </label>
   </div>
-  <div id="canvas-wrap">
+
+  <div id="main">
     <aside id="info">
       <div class="info-block">
         <h2>What is TerraTemp?</h2>
@@ -131,14 +263,34 @@
         <p>Tracking planetary temperature shifts helps researchers and policymakers understand climate change at a global scale.</p>
       </div>
     </aside>
-    <canvas id="globe"></canvas>
+
+    <div id="globe-container">
+      <canvas id="globe"></canvas>
+    </div>
+
+    <aside id="temp-panel">
+      <div class="panel-label">Temperature</div>
+      <div id="temp-value">0°C</div>
+      <div id="slider-area">
+        <div id="tick-labels">
+          <span>+3</span><span>+2</span><span>+1</span>
+          <span class="zero">0</span>
+          <span>−1</span><span>−2</span><span>−3</span>
+        </div>
+        <div id="track-wrap">
+          <div id="track-bg"></div>
+          <div id="track-fill"></div>
+          <div id="thumb"></div>
+        </div>
+      </div>
+    </aside>
   </div>
 
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
 
-    const wrap   = document.getElementById('canvas-wrap');
-    const canvas = document.getElementById('globe');
+    const globeContainer = document.getElementById('globe-container');
+    const canvas         = document.getElementById('globe');
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(devicePixelRatio);
@@ -147,54 +299,53 @@
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.z = 2.89;
 
-    // Ambient + directional light
     scene.add(new THREE.AmbientLight(0xffffff, 0.25));
     const sun = new THREE.DirectionalLight(0xa8d8ff, 1.6);
     sun.position.set(5, 3, 5);
     scene.add(sun);
 
-    // Globe sphere
     const geo    = new THREE.SphereGeometry(1, 64, 64);
     const loader = new THREE.TextureLoader();
 
-    // Use a public domain Earth texture
-    const earthTex = loader.load(
-      'https://unpkg.com/three-globe@2.30.0/example/img/earth-blue-marble.jpg'
-    );
-    const bumpTex = loader.load(
-      'https://unpkg.com/three-globe@2.30.0/example/img/earth-topology.png'
-    );
+    const earthTex = loader.load('https://unpkg.com/three-globe@2.30.0/example/img/earth-blue-marble.jpg');
+    const bumpTex  = loader.load('https://unpkg.com/three-globe@2.30.0/example/img/earth-topology.png');
 
     const mat = new THREE.MeshPhongMaterial({
-      map:         earthTex,
-      bumpMap:     bumpTex,
-      bumpScale:   0.05,
-      specular:    new THREE.Color(0x1a3a55),
-      shininess:   18,
+      map: earthTex, bumpMap: bumpTex, bumpScale: 0.05,
+      specular: new THREE.Color(0x1a3a55), shininess: 18,
     });
 
     const globe = new THREE.Mesh(geo, mat);
     scene.add(globe);
 
-    // Atmosphere glow (additive shell)
     const atmMat = new THREE.MeshPhongMaterial({
-      color:       0x2288ff,
-      transparent: true,
-      opacity:     0.08,
-      side:        THREE.FrontSide,
+      color: 0x2288ff, transparent: true, opacity: 0.08, side: THREE.FrontSide,
     });
     const atm = new THREE.Mesh(new THREE.SphereGeometry(1.035, 64, 64), atmMat);
     scene.add(atm);
 
-    // Stars
-    const starGeo = new THREE.BufferGeometry();
-    const starPos = new Float32Array(3000).map(() => (Math.random() - 0.5) * 80);
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-    scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.06 })));
+    // Stars on a separate full-screen canvas
+    const starCanvas = document.getElementById('stars-bg');
+    const starCtx    = starCanvas.getContext('2d');
+    function drawStars() {
+      starCanvas.width  = window.innerWidth;
+      starCanvas.height = window.innerHeight;
+      starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+      for (let i = 0; i < 1800; i++) {
+        const x = Math.random() * starCanvas.width;
+        const y = Math.random() * starCanvas.height;
+        const r = Math.random() * 1.1;
+        starCtx.beginPath();
+        starCtx.arc(x, y, r, 0, Math.PI * 2);
+        starCtx.fillStyle = `rgba(255,255,255,${(Math.random() * 0.6 + 0.2).toFixed(2)})`;
+        starCtx.fill();
+      }
+    }
+    drawStars();
+    window.addEventListener('resize', drawStars);
 
-    // Resize
     function resize() {
-      const w = wrap.clientWidth, h = wrap.clientHeight;
+      const w = globeContainer.clientWidth, h = globeContainer.clientHeight;
       renderer.setSize(w, h);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
@@ -202,7 +353,6 @@
     resize();
     window.addEventListener('resize', resize);
 
-    // Drag to rotate
     let drag = false, lastX = 0, lastY = 0;
     let rotX = 0, rotY = 0, velX = 0, velY = 0;
 
@@ -221,7 +371,73 @@
 
     const autoRotateToggle = document.getElementById('autoRotate');
 
-    // Animate
+    // ── Temperature slider ──
+    const trackWrap = document.getElementById('track-wrap');
+    const trackFill = document.getElementById('track-fill');
+    const thumb     = document.getElementById('thumb');
+    const tempValue = document.getElementById('temp-value');
+
+    const TRACK_H = 460;
+    const MIN = -3, MAX = 3, STEPS = MAX - MIN;
+    let tempStep = 0;
+
+    const STEP_COLORS = {
+      '3':  '#c0392b',
+      '2':  '#e67e22',
+      '1':  '#f1c40f',
+      '0':  '#c8dce8',
+      '-1': '#7fb3d3',
+      '-2': '#2980b9',
+      '-3': '#29d4ff',
+    };
+
+    function updateSlider(v) {
+      tempStep = Math.max(MIN, Math.min(MAX, v));
+      const frac  = (MAX - tempStep) / STEPS;
+      const thumbY = frac * TRACK_H;
+      thumb.style.top = thumbY + 'px';
+
+      const color = STEP_COLORS[String(tempStep)];
+      thumb.style.background  = color;
+      thumb.style.boxShadow   = `0 0 16px ${color}cc, 0 0 32px ${color}44`;
+      tempValue.style.color   = color;
+      tempValue.textContent   = (tempStep > 0 ? '+' : '') + tempStep + '°C';
+
+      const centerY = TRACK_H / 2;
+      if (tempStep >= 0) {
+        trackFill.style.top    = thumbY + 'px';
+        trackFill.style.bottom = (TRACK_H - centerY) + 'px';
+        trackFill.style.height = '';
+      } else {
+        trackFill.style.top    = centerY + 'px';
+        trackFill.style.bottom = (TRACK_H - thumbY) + 'px';
+        trackFill.style.height = '';
+      }
+      trackFill.style.background = color;
+      trackFill.style.opacity    = '0.55';
+    }
+
+    updateSlider(0);
+
+    function yToStep(clientY) {
+      const rect = trackWrap.getBoundingClientRect();
+      const frac = Math.max(0, Math.min(1, (clientY - rect.top) / TRACK_H));
+      return Math.round(MAX - frac * STEPS);
+    }
+
+    let sliderDrag = false;
+    trackWrap.addEventListener('pointerdown', e => {
+      sliderDrag = true;
+      trackWrap.setPointerCapture(e.pointerId);
+      updateSlider(yToStep(e.clientY));
+    });
+    trackWrap.addEventListener('pointermove', e => {
+      if (!sliderDrag) return;
+      updateSlider(yToStep(e.clientY));
+    });
+    trackWrap.addEventListener('pointerup', () => sliderDrag = false);
+
+    // ── Animate ──
     (function animate() {
       requestAnimationFrame(animate);
       const autoRotate = autoRotateToggle.checked;
