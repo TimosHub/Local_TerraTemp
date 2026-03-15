@@ -42,10 +42,51 @@
     }
 
     canvas { display: block; }
+
+    #controls {
+      position: fixed;
+      bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #5a8aaa;
+    }
+
+    /* Toggle switch */
+    .switch { position: relative; width: 36px; height: 20px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0;
+      background: #1a2a3a;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.25s;
+    }
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      left: 3px; top: 3px;
+      background: #5a8aaa;
+      border-radius: 50%;
+      transition: transform 0.25s, background 0.25s;
+    }
+    input:checked + .slider { background: #1a3a55; }
+    input:checked + .slider::before { transform: translateX(16px); background: #7ecfff; }
   </style>
 </head>
 <body>
   <header><span>Terra</span>Temp</header>
+  <div id="controls">
+    <span>Auto-rotate</span>
+    <label class="switch">
+      <input type="checkbox" id="autoRotate" checked />
+      <span class="slider"></span>
+    </label>
+  </div>
   <div id="canvas-wrap">
     <canvas id="globe"></canvas>
   </div>
@@ -135,10 +176,13 @@
     });
     canvas.addEventListener('pointerup', () => drag = false);
 
+    const autoRotateToggle = document.getElementById('autoRotate');
+
     // Animate
     (function animate() {
       requestAnimationFrame(animate);
-      if (!drag) { velX *= 0.92; velY *= 0.92; rotX += velX; rotY += velY + 0.001; }
+      const autoRotate = autoRotateToggle.checked;
+      if (!drag) { velX *= 0.92; velY *= 0.92; rotX += velX; rotY += velY + (autoRotate ? 0.001 : 0); }
       globe.rotation.x = rotX;
       globe.rotation.y = rotY;
       atm.rotation.copy(globe.rotation);
