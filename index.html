@@ -39,7 +39,35 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
+
+    #info {
+      position: absolute;
+      left: 6%;
+      max-width: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    #info h2 {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #7ecfff;
+      margin-bottom: 4px;
+    }
+
+    #info p {
+      font-size: 0.8rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: #7a9bb5;
+    }
+
+    .info-block { border-left: 1px solid #1a3a55; padding-left: 14px; }
 
     canvas { display: block; }
 
@@ -89,6 +117,20 @@
     </label>
   </div>
   <div id="canvas-wrap">
+    <aside id="info">
+      <div class="info-block">
+        <h2>What is TerraTemp?</h2>
+        <p>A real-time Earth temperature monitoring platform that aggregates global sensor data into a single, unified view.</p>
+      </div>
+      <div class="info-block">
+        <h2>How it works</h2>
+        <p>Surface and atmospheric readings are collected, normalized, and mapped onto the globe — updated continuously.</p>
+      </div>
+      <div class="info-block">
+        <h2>Why it matters</h2>
+        <p>Tracking planetary temperature shifts helps researchers and policymakers understand climate change at a global scale.</p>
+      </div>
+    </aside>
     <canvas id="globe"></canvas>
   </div>
 
