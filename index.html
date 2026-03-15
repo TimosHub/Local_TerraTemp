@@ -198,6 +198,21 @@
 
     #thumb:active { cursor: grabbing; }
 
+    /* ── Terrain toggle ── */
+    #terrain-controls {
+      position: fixed;
+      top: 58px;
+      right: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #5a8aaa;
+      z-index: 20;
+    }
+
     /* ── Auto-rotate toggle ── */
     #controls {
       position: fixed;
@@ -243,6 +258,13 @@
     <span>Auto-rotate</span>
     <label class="switch">
       <input type="checkbox" id="autoRotate" checked />
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div id="terrain-controls">
+    <span>Elevation</span>
+    <label class="switch">
+      <input type="checkbox" id="terrainToggle" />
       <span class="slider"></span>
     </label>
   </div>
@@ -415,6 +437,12 @@
     }
 
     const autoRotateToggle = document.getElementById('autoRotate');
+
+    // ── Terrain toggle ──
+    document.getElementById('terrainToggle').addEventListener('change', e => {
+      mat.map = e.target.checked ? bumpTex : earthTex;
+      mat.needsUpdate = true;
+    });
 
     // ── Temperature slider ──
     const trackWrap = document.getElementById('track-wrap');
