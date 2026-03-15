@@ -45,7 +45,8 @@
 
     #controls {
       position: fixed;
-      bottom: 28px;
+      top: 22px;
+      right: 28px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -102,7 +103,7 @@
 
     const scene  = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.z = 2.6;
+    camera.position.z = 2.89;
 
     // Ambient + directional light
     scene.add(new THREE.AmbientLight(0xffffff, 0.25));
