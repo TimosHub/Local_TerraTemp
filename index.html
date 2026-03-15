@@ -366,7 +366,7 @@
 
     // ── Drag to rotate + pinch to zoom ──
     let drag = false, lastX = 0, lastY = 0;
-    let rotX = 0, rotY = 0, velX = 0, velY = 0;
+    let rotX = 0.45, rotY = -2.4, velX = 0, velY = 0;
     const activePointers = new Map();
     let lastPinchDist = 0;
 
@@ -393,8 +393,8 @@
         return;
       }
       if (!drag) return;
-      velY = (e.clientX - lastX) * 0.005;
-      velX = (e.clientY - lastY) * 0.005;
+      velY = (e.clientX - lastX) * 0.003;
+      velX = (e.clientY - lastY) * 0.003;
       rotY += velY; rotX += velX;
       lastX = e.clientX; lastY = e.clientY;
     });
@@ -486,7 +486,7 @@
     (function animate() {
       requestAnimationFrame(animate);
       const autoRotate = autoRotateToggle.checked;
-      if (!drag) { velX *= 0.92; velY *= 0.92; rotX += velX; rotY += velY + (autoRotate ? 0.001 : 0); }
+      if (!drag) { velX *= 0.92; velY *= 0.92; rotX += velX; rotY += velY + (autoRotate ? 0.00075 : 0); }
       globe.rotation.x = rotX;
       globe.rotation.y = rotY;
       atm.rotation.copy(globe.rotation);
