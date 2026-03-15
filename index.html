@@ -55,12 +55,12 @@
 
     /* ── Info panel ── */
     #info {
-      width: 230px;
-      flex-shrink: 0;
+      flex: 1;
       display: flex;
       flex-direction: column;
       gap: 22px;
-      padding-left: 44px;
+      align-items: flex-end;
+      padding-right: 44px;
     }
 
     #info h2 {
@@ -79,7 +79,7 @@
       color: #7a9bb5;
     }
 
-    .info-block { border-left: 1px solid #1a3a55; padding-left: 14px; }
+    .info-block { border-left: 1px solid #1a3a55; padding-left: 14px; max-width: 220px; }
 
     /* ── Globe ── */
     #globe-container {
@@ -95,14 +95,13 @@
 
     /* ── Temperature slider ── */
     #temp-panel {
-      flex-shrink: 0;
-      width: 110px;
+      flex: 1;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       gap: 14px;
       user-select: none;
-      padding-right: 20px;
+      padding-left: 20px;
     }
 
     #temp-panel .panel-label {
@@ -353,21 +352,67 @@
     resize();
     window.addEventListener('resize', resize);
 
+    // ── Zoom ──
+    let currentZ = 2.89, targetZ = 2.89;
+    const MIN_Z = 1.8, MAX_Z = 4.5;
+
+    canvas.addEventListener('wheel', e => {
+      if (e.ctrlKey) return;
+      e.preventDefault();
+      const delta = Math.max(-1, Math.min(1, e.deltaY / 100));
+      targetZ += delta * 0.024 * targetZ;
+      targetZ = Math.max(MIN_Z, Math.min(MAX_Z, targetZ));
+    }, { passive: false });
+
+    // ── Drag to rotate + pinch to zoom ──
     let drag = false, lastX = 0, lastY = 0;
     let rotX = 0, rotY = 0, velX = 0, velY = 0;
+    const activePointers = new Map();
+    let lastPinchDist = 0;
 
     canvas.addEventListener('pointerdown', e => {
-      drag = true; lastX = e.clientX; lastY = e.clientY;
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       canvas.setPointerCapture(e.pointerId);
+      if (activePointers.size === 1) {
+        drag = true; lastX = e.clientX; lastY = e.clientY;
+      } else {
+        drag = false;
+        lastPinchDist = getPinchDist();
+      }
     });
+
     canvas.addEventListener('pointermove', e => {
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (activePointers.size === 2) {
+        const dist = getPinchDist();
+        if (lastPinchDist > 0) {
+          targetZ *= lastPinchDist / dist;
+          targetZ = Math.max(MIN_Z, Math.min(MAX_Z, targetZ));
+        }
+        lastPinchDist = dist;
+        return;
+      }
       if (!drag) return;
       velY = (e.clientX - lastX) * 0.005;
       velX = (e.clientY - lastY) * 0.005;
       rotY += velY; rotX += velX;
       lastX = e.clientX; lastY = e.clientY;
     });
-    canvas.addEventListener('pointerup', () => drag = false);
+
+    canvas.addEventListener('pointerup', e => {
+      activePointers.delete(e.pointerId);
+      lastPinchDist = 0;
+      drag = activePointers.size === 1;
+      if (drag) {
+        const [p] = activePointers.values();
+        lastX = p.x; lastY = p.y;
+      }
+    });
+
+    function getPinchDist() {
+      const [a, b] = activePointers.values();
+      return Math.hypot(b.x - a.x, b.y - a.y);
+    }
 
     const autoRotateToggle = document.getElementById('autoRotate');
 
@@ -445,6 +490,8 @@
       globe.rotation.x = rotX;
       globe.rotation.y = rotY;
       atm.rotation.copy(globe.rotation);
+      currentZ += (targetZ - currentZ) * 0.15;
+      camera.position.z = currentZ;
       renderer.render(scene, camera);
     })();
   </script>
