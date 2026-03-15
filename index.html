@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TerraTemp</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #080c14;
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 28px 0 0;
+      letter-spacing: 0.18em;
+      font-size: 1.1rem;
+      font-weight: 300;
+      text-transform: uppercase;
+      color: #7ecfff;
+      z-index: 10;
+    }
+
+    header span {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    #canvas-wrap {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <header><span>Terra</span>Temp</header>
+  <div id="canvas-wrap">
+    <canvas id="globe"></canvas>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
+
+    const wrap   = document.getElementById('canvas-wrap');
+    const canvas = document.getElementById('globe');
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(devicePixelRatio);
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.z = 2.6;
+
+    // Ambient + directional light
+    scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+    const sun = new THREE.DirectionalLight(0xa8d8ff, 1.6);
+    sun.position.set(5, 3, 5);
+    scene.add(sun);
+
+    // Globe sphere
+    const geo    = new THREE.SphereGeometry(1, 64, 64);
+    const loader = new THREE.TextureLoader();
+
+    // Use a public domain Earth texture
+    const earthTex = loader.load(
+      'https://unpkg.com/three-globe@2.30.0/example/img/earth-blue-marble.jpg'
+    );
+    const bumpTex = loader.load(
+      'https://unpkg.com/three-globe@2.30.0/example/img/earth-topology.png'
+    );
+
+    const mat = new THREE.MeshPhongMaterial({
+      map:         earthTex,
+      bumpMap:     bumpTex,
+      bumpScale:   0.05,
+      specular:    new THREE.Color(0x1a3a55),
+      shininess:   18,
+    });
+
+    const globe = new THREE.Mesh(geo, mat);
+    scene.add(globe);
+
+    // Atmosphere glow (additive shell)
+    const atmMat = new THREE.MeshPhongMaterial({
+      color:       0x2288ff,
+      transparent: true,
+      opacity:     0.08,
+      side:        THREE.FrontSide,
+    });
+    const atm = new THREE.Mesh(new THREE.SphereGeometry(1.035, 64, 64), atmMat);
+    scene.add(atm);
+
+    // Stars
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = new Float32Array(3000).map(() => (Math.random() - 0.5) * 80);
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.06 })));
+
+    // Resize
+    function resize() {
+      const w = wrap.clientWidth, h = wrap.clientHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Drag to rotate
+    let drag = false, lastX = 0, lastY = 0;
+    let rotX = 0, rotY = 0, velX = 0, velY = 0;
+
+    canvas.addEventListener('pointerdown', e => {
+      drag = true; lastX = e.clientX; lastY = e.clientY;
+      canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (!drag) return;
+      velY = (e.clientX - lastX) * 0.005;
+      velX = (e.clientY - lastY) * 0.005;
+      rotY += velY; rotX += velX;
+      lastX = e.clientX; lastY = e.clientY;
+    });
+    canvas.addEventListener('pointerup', () => drag = false);
+
+    // Animate
+    (function animate() {
+      requestAnimationFrame(animate);
+      if (!drag) { velX *= 0.92; velY *= 0.92; rotX += velX; rotY += velY + 0.001; }
+      globe.rotation.x = rotX;
+      globe.rotation.y = rotY;
+      atm.rotation.copy(globe.rotation);
+      renderer.render(scene, camera);
+    })();
+  </script>
+</body>
+</html>
