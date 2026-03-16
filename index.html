@@ -254,10 +254,29 @@
     }
     input:checked + .slider { background: #1a3a55; }
     input:checked + .slider::before { transform: translateX(16px); background: #7ecfff; }
+
+    /* ── Option 1: Footer email ── */
+    #footer-email {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: #2a4a5a;
+      z-index: 20;
+      user-select: text;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    #footer-email:hover { color: #5a8aaa; }
+
   </style>
 </head>
 <body>
   <canvas id="stars-bg"></canvas>
+  <a id="footer-email" href="mailto:info@terratemp.world">info@terratemp.world</a>
   <header><span>Terra</span>Temp</header>
 
   <div id="controls">
