@@ -380,6 +380,8 @@
 
       #controls { top: 58px; }
 
+      #temp-panel .panel-label { display: none; }
+
       #controls span { display: none; }
 
       #terrain-controls { display: none; }
@@ -516,6 +518,10 @@
       const w = globeContainer.clientWidth, h = globeContainer.clientHeight;
       renderer.setSize(w, h);
       camera.aspect = w / h;
+      // Lock horizontal FOV on portrait canvases so globe never clips left/right
+      camera.fov = camera.aspect < 1
+        ? 2 * Math.atan(Math.tan(Math.PI / 8) / camera.aspect) * (180 / Math.PI)
+        : 45;
       camera.updateProjectionMatrix();
     }
     resize();
