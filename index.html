@@ -322,6 +322,46 @@
 
     #footer-email:hover { color: #5a8aaa; }
 
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      header { padding: 16px 0 0; font-size: 0.9rem; }
+
+      #info { display: none; }
+
+      #globe-container { height: 100%; }
+
+      #temp-panel {
+        padding-left: 10px;
+        gap: 8px;
+      }
+
+      #temp-panel .panel-label { font-size: 0.6rem; }
+
+      #temp-value { font-size: 1.2rem; }
+
+      #slider-area { gap: 6px; }
+
+      #tick-labels {
+        height: 200px;
+        font-size: 0.6rem;
+      }
+
+      #track-wrap {
+        width: 10px;
+        height: 200px;
+      }
+
+      #thumb { width: 22px; height: 22px; }
+
+      #controls, #terrain-controls {
+        font-size: 0.65rem;
+        gap: 7px;
+      }
+
+      #terrain-controls { top: 50px; }
+
+      #footer-email { font-size: 0.55rem; bottom: 10px; }
+    }
   </style>
 </head>
 <body>
@@ -455,7 +495,7 @@
       camera.updateProjectionMatrix();
     }
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', () => { resize(); updateSlider(tempStep); });
 
     // ── Zoom ──
     let currentZ = 2.89, targetZ = 2.89;
@@ -533,7 +573,7 @@
     const thumb     = document.getElementById('thumb');
     const tempValue = document.getElementById('temp-value');
 
-    const TRACK_H = 460;
+    const trackH = () => trackWrap.clientHeight;
     const MIN = -3, MAX = 3, STEPS = MAX - MIN;
     let tempStep = 0;
 
@@ -550,7 +590,7 @@
     function updateSlider(v) {
       tempStep = Math.max(MIN, Math.min(MAX, v));
       const frac  = (MAX - tempStep) / STEPS;
-      const thumbY = frac * TRACK_H;
+      const thumbY = frac * trackH();
       thumb.style.top = thumbY + 'px';
 
       const color = STEP_COLORS[String(tempStep)];
@@ -559,14 +599,14 @@
       tempValue.style.color   = color;
       tempValue.textContent   = (tempStep > 0 ? '+' : '') + tempStep + '°C';
 
-      const centerY = TRACK_H / 2;
+      const centerY = trackH() / 2;
       if (tempStep >= 0) {
         trackFill.style.top    = thumbY + 'px';
-        trackFill.style.bottom = (TRACK_H - centerY) + 'px';
+        trackFill.style.bottom = (trackH() - centerY) + 'px';
         trackFill.style.height = '';
       } else {
         trackFill.style.top    = centerY + 'px';
-        trackFill.style.bottom = (TRACK_H - thumbY) + 'px';
+        trackFill.style.bottom = (trackH() - thumbY) + 'px';
         trackFill.style.height = '';
       }
       trackFill.style.background = color;
@@ -577,7 +617,7 @@
 
     function yToStep(clientY) {
       const rect = trackWrap.getBoundingClientRect();
-      const frac = Math.max(0, Math.min(1, (clientY - rect.top) / TRACK_H));
+      const frac = Math.max(0, Math.min(1, (clientY - rect.top) / trackH()));
       return Math.round(MAX - frac * STEPS);
     }
 
