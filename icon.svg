@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#080c14"/>
+  <defs>
+    <radialGradient id="globe" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#7ecfff"/>
+      <stop offset="100%" stop-color="#1a5276"/>
+    </radialGradient>
+    <clipPath id="clip">
+      <circle cx="256" cy="256" r="162"/>
+    </clipPath>
+  </defs>
+  <circle cx="256" cy="256" r="162" fill="url(#globe)"/>
+  <g clip-path="url(#clip)" stroke="rgba(255,255,255,0.12)" stroke-width="2" fill="none">
+    <ellipse cx="256" cy="256" rx="162" ry="55"/>
+    <ellipse cx="256" cy="256" rx="162" ry="115"/>
+    <line x1="94" y1="256" x2="418" y2="256"/>
+    <ellipse cx="256" cy="256" rx="55" ry="162"/>
+    <ellipse cx="256" cy="256" rx="115" ry="162"/>
+  </g>
+  <circle cx="256" cy="256" r="162" fill="none" stroke="#7ecfff" stroke-width="3" opacity="0.35"/>
+</svg>

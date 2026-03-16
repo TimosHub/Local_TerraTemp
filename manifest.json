@@ -1,0 +1,19 @@
+{
+  "name": "TerraTemp",
+  "short_name": "TerraTemp",
+  "description": "Real-time Earth temperature monitoring",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#080c14",
+  "theme_color": "#080c14",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
