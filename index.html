@@ -378,7 +378,12 @@
         gap: 7px;
       }
 
-      #controls { top: 58px; }
+      #controls {
+        top: 68px;
+        z-index: 999;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+      }
 
       #temp-panel .panel-label { display: none; }
 
