@@ -328,26 +328,47 @@
 
       #info { display: none; }
 
+      /* Globe fills entire main area */
+      #globe-container {
+        position: absolute;
+        inset: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      /* Slider overlaid on right side */
       #temp-panel {
-        flex: 0 0 70px;
-        padding-left: 8px;
-        gap: 8px;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        flex: none;
+        width: auto;
+        padding: 16px 10px 16px 12px;
+        gap: 10px;
+        background: rgba(8, 12, 20, 0.72);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 12px 0 0 12px;
+        border: 1px solid #1a3a55;
+        border-right: none;
+        z-index: 10;
       }
 
       #temp-panel .panel-label { font-size: 0.6rem; }
 
-      #temp-value { font-size: 1.2rem; }
+      #temp-value { font-size: 1.3rem; }
 
       #slider-area { gap: 6px; }
 
       #tick-labels {
-        height: min(200px, 55vh);
+        height: min(260px, 52vh);
         font-size: 0.6rem;
       }
 
       #track-wrap {
         width: 10px;
-        height: min(200px, 55vh);
+        height: min(260px, 52vh);
       }
 
       #thumb { width: 22px; height: 22px; }
