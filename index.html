@@ -89,9 +89,9 @@
 
     /* ── Globe ── */
     #globe-container {
-      flex-shrink: 0;
+      flex: 1;
+      min-width: 0;
       height: 100%;
-      aspect-ratio: 1 / 1;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -101,7 +101,7 @@
 
     /* ── Temperature slider ── */
     #temp-panel {
-      flex: 1;
+      flex: 0 0 110px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -137,7 +137,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 460px;
+      height: min(460px, 65vh);
       padding: 10px 0;
     }
 
@@ -153,7 +153,7 @@
     #track-wrap {
       position: relative;
       width: 16px;
-      height: 460px;
+      height: min(460px, 65vh);
       cursor: pointer;
     }
 
@@ -328,17 +328,9 @@
 
       #info { display: none; }
 
-      #globe-container {
-        flex: 1;
-        height: auto;
-        max-height: 100%;
-        min-width: 0;
-      }
-
       #temp-panel {
-        flex: 0 0 80px;
-        width: 80px;
-        padding-left: 10px;
+        flex: 0 0 70px;
+        padding-left: 8px;
         gap: 8px;
       }
 
@@ -349,13 +341,13 @@
       #slider-area { gap: 6px; }
 
       #tick-labels {
-        height: 200px;
+        height: min(200px, 55vh);
         font-size: 0.6rem;
       }
 
       #track-wrap {
         width: 10px;
-        height: 200px;
+        height: min(200px, 55vh);
       }
 
       #thumb { width: 22px; height: 22px; }
