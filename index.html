@@ -331,15 +331,14 @@
 
       /* Globe fills entire main area */
       #globe-container {
-        position: absolute;
-        inset: 0;
+        flex: 1;
         height: 100%;
         width: 100%;
       }
 
-      /* Slider overlaid on right side */
+      /* Slider fixed to viewport right side */
       #temp-panel {
-        position: absolute;
+        position: fixed;
         right: 0;
         top: 50%;
         transform: translateY(-50%);
@@ -353,7 +352,7 @@
         border-radius: 12px 0 0 12px;
         border: 1px solid #1a3a55;
         border-right: none;
-        z-index: 10;
+        z-index: 50;
       }
 
       #temp-panel .panel-label { font-size: 0.6rem; }
