@@ -529,14 +529,16 @@
 
     // ── Zoom ──
     let currentZ = 2.89, targetZ = 2.89;
-    const MIN_Z = 1.8, MAX_Z = 4.5;
+    const isMobile = () => window.innerWidth <= 768;
+    const MIN_Z = () => isMobile() ? 1.2 : 1.8;
+    const MAX_Z = () => isMobile() ? 3.5 : 4.5;
 
     canvas.addEventListener('wheel', e => {
       if (e.ctrlKey) return;
       e.preventDefault();
       const delta = Math.max(-1, Math.min(1, e.deltaY / 100));
       targetZ += delta * 0.024 * targetZ;
-      targetZ = Math.max(MIN_Z, Math.min(MAX_Z, targetZ));
+      targetZ = Math.max(MIN_Z(), Math.min(MAX_Z(), targetZ));
     }, { passive: false });
 
     // ── Drag to rotate + pinch to zoom ──
@@ -562,7 +564,7 @@
         const dist = getPinchDist();
         if (lastPinchDist > 0) {
           targetZ *= lastPinchDist / dist;
-          targetZ = Math.max(MIN_Z, Math.min(MAX_Z, targetZ));
+          targetZ = Math.max(MIN_Z(), Math.min(MAX_Z(), targetZ));
         }
         lastPinchDist = dist;
         return;
